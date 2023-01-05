@@ -6,6 +6,7 @@
 This is a software development kit for Unity that allows you to make microcontroller-based VR hardware communicate to your Unity project. Currently it supports communication via Bluetooth Serial between microcontrollers and Android-based VR headsets.
 
 ## Where do I start?
+Check the [Wiki](https://github.com/VRatMIT/TheSingularity-Unity/wiki) for a quick start guide on how to use The Singularity for your hardware projects.
 
 ## Details
 
