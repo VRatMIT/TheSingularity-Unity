@@ -10,7 +10,7 @@
       </intent-filter>
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
     </activity>
-    <activity android:name="com.tony.bluetoothunityapi.EmptyActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    <activity android:name="com.harrysoft.androidbluetoothserial" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
   </application>
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
