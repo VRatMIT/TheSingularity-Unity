@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Implementation of BluetoothSerialDevice, package-private
  */
 internal class BluetoothSerialDeviceImpl constructor(
-        override val mac: String,
+        @JvmField override val mac: String,
         private val socket: BluetoothSocket,
         private val charset: Charset
 ) : BluetoothSerialDevice {
