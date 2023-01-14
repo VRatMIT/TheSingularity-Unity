@@ -17,5 +17,6 @@ Check the [Wiki](https://github.com/VRatMIT/TheSingularity-Unity/wiki) for a qui
 
 **Tested platforms:**
 * Oculus Quest 2
+* Oculus Quest Pro
 * Pico Neo 3/4
 * *[PLANNED]* PCVR
