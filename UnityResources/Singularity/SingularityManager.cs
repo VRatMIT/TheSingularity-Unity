@@ -44,7 +44,7 @@ namespace Sngty
             if (!hasBtScanPermission) {
                 permissionsNeeded.Add("android.permission.BLUETOOTH_SCAN");
             }
-            Debug.LogWarning("requesting permissions: " + string.Join(", ", permissionsNeeded));
+            Debug.LogWarning("May need to restart the app. Requesting permissions: " + string.Join(", ", permissionsNeeded));
             Permission.RequestUserPermissions(permissionsNeeded.ToArray());
 
             BluetoothManager = new AndroidJavaClass("com.harrysoft.androidbluetoothserial.BluetoothManager");
