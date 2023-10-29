@@ -16,13 +16,47 @@ namespace Sngty
 
         private List<AndroidJavaObject> connectedDevices;
 
-        // Start is called before the first frame update
-        void Start()
+        // Awake is called before any object's Start().
+        // Set up bluetooth using Awake() so it's ready for other objects.
+        // Trying to use the singularity manager in other script's Awake() methods may not work properly.
+        void Awake()
         {
+            // Check for necessary bluetooth permissions and request if necessary
+            // You may need to restart the app on the headset after granting permissions.
+            // Sometimes, you may need to restart the app twice for the permissions to fully work.
+            // This is a quick and dirty solution for getting the permissions.
+            // A better way is to use callbacks to let everything else know when the permissions have been granted.
+            bool hasBtConnectPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_CONNECT");
+            bool hasBtPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH");
+            bool hasBtAdminPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_ADMIN");
+            bool hasBtScanPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_SCAN");
+
+            List<string> permissionsNeeded = new List<string>();
+            if (!hasBtConnectPermission) {
+                permissionsNeeded.Add("android.permission.BLUETOOTH_CONNECT");
+            }
+            if (!hasBtPermission) {
+                permissionsNeeded.Add("android.permission.BLUETOOTH");
+            }
+            if (!hasBtAdminPermission) {
+                permissionsNeeded.Add("android.permission.BLUETOOTH_ADMIN");
+            }
+            if (!hasBtScanPermission) {
+                permissionsNeeded.Add("android.permission.BLUETOOTH_SCAN");
+            }
+            Debug.LogWarning("May need to restart the app. Requesting permissions: " + string.Join(", ", permissionsNeeded));
+            Permission.RequestUserPermissions(permissionsNeeded.ToArray());
+
             BluetoothManager = new AndroidJavaClass("com.harrysoft.androidbluetoothserial.BluetoothManager");
             bluetoothManager = BluetoothManager.CallStatic<AndroidJavaObject>("getInstance");
 
             connectedDevices = new List<AndroidJavaObject>();
+        }
+
+
+        // Start is called before the first frame update
+        void Start()
+        {
         }
 
         // Update is called once per frame
