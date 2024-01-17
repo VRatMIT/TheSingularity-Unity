@@ -8,6 +8,7 @@ namespace Sngty
 {
     public class SingularityManager : MonoBehaviour
     {
+        public UnityEvent onBluetoothReady;
         public UnityEvent onConnected;
         public UnityEvent<string> onMessageRecieved;
         public UnityEvent<string> onError;
@@ -16,6 +17,24 @@ namespace Sngty
         private AndroidJavaObject bluetoothManager;
 
         private List<AndroidJavaObject> connectedDevices;
+
+
+        internal void PermissionCallbacks_PermissionDeniedAndDontAskAgain(string permissionName)
+        {
+            Debug.Log($"{permissionName} PermissionDeniedAndDontAskAgain");
+        }
+
+        internal void PermissionCallbacks_PermissionGranted(string permissionName)
+        {
+            Debug.Log($"{permissionName} PermissionCallbacks_PermissionGranted");
+
+            BluetoothPermissionsGranted();
+        }
+
+        internal void PermissionCallbacks_PermissionDenied(string permissionName)
+        {
+            Debug.Log($"{permissionName} PermissionCallbacks_PermissionDenied");
+        }
 
         // Awake is called before any object's Start().
         // Set up bluetooth using Awake() so it's ready for other objects.
@@ -33,25 +52,37 @@ namespace Sngty
             bool hasBtScanPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_SCAN");
 
             List<string> permissionsNeeded = new List<string>();
-            if (!hasBtConnectPermission) {
+            if (!hasBtConnectPermission)
+            {
                 permissionsNeeded.Add("android.permission.BLUETOOTH_CONNECT");
             }
-            if (!hasBtPermission) {
+            if (!hasBtPermission)
+            {
                 permissionsNeeded.Add("android.permission.BLUETOOTH");
             }
-            if (!hasBtAdminPermission) {
+            if (!hasBtAdminPermission)
+            {
                 permissionsNeeded.Add("android.permission.BLUETOOTH_ADMIN");
             }
-            if (!hasBtScanPermission) {
+            if (!hasBtScanPermission)
+            {
                 permissionsNeeded.Add("android.permission.BLUETOOTH_SCAN");
             }
             Debug.LogWarning("May need to restart the app. Requesting permissions: " + string.Join(", ", permissionsNeeded));
-            Permission.RequestUserPermissions(permissionsNeeded.ToArray());
 
-            BluetoothManager = new AndroidJavaClass("com.harrysoft.androidbluetoothserial.BluetoothManager");
-            bluetoothManager = BluetoothManager.CallStatic<AndroidJavaObject>("getInstance");
+            if (permissionsNeeded.Count == 0)
+            {
+                BluetoothPermissionsGranted();
+            }
+            else
+            {
+                var callbacks = new PermissionCallbacks();
+                callbacks.PermissionDenied += PermissionCallbacks_PermissionDenied;
+                callbacks.PermissionGranted += PermissionCallbacks_PermissionGranted;
+                callbacks.PermissionDeniedAndDontAskAgain += PermissionCallbacks_PermissionDeniedAndDontAskAgain;
 
-            connectedDevices = new List<AndroidJavaObject>();
+                Permission.RequestUserPermissions(permissionsNeeded.ToArray(), callbacks);
+            }
         }
 
 
@@ -63,7 +94,16 @@ namespace Sngty
         // Update is called once per frame
         void Update()
         {
+        }
 
+        private void BluetoothPermissionsGranted()
+        {
+            BluetoothManager = new AndroidJavaClass("com.harrysoft.androidbluetoothserial.BluetoothManager");
+            bluetoothManager = BluetoothManager.CallStatic<AndroidJavaObject>("getInstance");
+
+            connectedDevices = new List<AndroidJavaObject>();
+
+            onBluetoothReady.Invoke();
         }
 
         public void ConnectToDevice(DeviceSignature sig)
@@ -71,7 +111,7 @@ namespace Sngty
             AndroidJavaClass Schedulers = new AndroidJavaClass("io.reactivex.schedulers.Schedulers");
             AndroidJavaClass AndroidSchedulers = new AndroidJavaClass("io.reactivex.android.schedulers.AndroidSchedulers");
             bluetoothManager.Call<AndroidJavaObject>("openSerialDevice", sig.mac)
-                            .Call<AndroidJavaObject>("subscribeOn",Schedulers.CallStatic<AndroidJavaObject>("io"))
+                            .Call<AndroidJavaObject>("subscribeOn", Schedulers.CallStatic<AndroidJavaObject>("io"))
                             .Call<AndroidJavaObject>("observeOn", AndroidSchedulers.CallStatic<AndroidJavaObject>("mainThread"))
                             .Call("subscribe", new RxSingleObserver(onError, onConnected, onMessageRecieved, connectedDevices));
 
@@ -135,7 +175,7 @@ namespace Sngty
             private List<AndroidJavaObject> connectedDevices;
             public RxSingleObserver(UnityEvent<string> onErrorEvent, UnityEvent onConnectedEvent, UnityEvent<string> onMessageRecievedEvent, List<AndroidJavaObject> connectedDevices) : base("io.reactivex.SingleObserver")
             {
-                this.onErrorEvent = onErrorEvent; 
+                this.onErrorEvent = onErrorEvent;
                 this.onConnectedEvent = onConnectedEvent;
                 this.onMessageRecievedEvent = onMessageRecievedEvent;
                 this.connectedDevices = connectedDevices;
