@@ -18,6 +18,14 @@ namespace Sngty
 
         private List<AndroidJavaObject> connectedDevices;
 
+        private HashSet<string> BtPermissionsNeeded = new HashSet<string> { 
+            "android.permission.BLUETOOTH_CONNECT", 
+            "android.permission.BLUETOOTH", 
+            "android.permission.BLUETOOTH_ADMIN", 
+            "android.permission.BLUETOOTH_SCAN" 
+            };
+
+
 
         internal void PermissionCallbacks_PermissionDeniedAndDontAskAgain(string permissionName)
         {
@@ -28,7 +36,10 @@ namespace Sngty
         {
             Debug.Log($"{permissionName} PermissionCallbacks_PermissionGranted");
 
-            BluetoothPermissionsGranted();
+            BtPermissionsNeeded.Remove(permissionName);
+            if (BtPermissionsNeeded.Count == 0){
+                BluetoothPermissionsGranted();
+            }
         }
 
         internal void PermissionCallbacks_PermissionDenied(string permissionName)
@@ -38,44 +49,29 @@ namespace Sngty
 
         // Awake is called before any object's Start().
         // Set up bluetooth using Awake() so it's ready for other objects.
-        // Trying to use the singularity manager in other script's Awake() methods may not work properly.
+        // Trying to use SingularityManager in other script's Awake() methods may not work properly 
+        // unless you set up callbacks correctly.
         void Awake()
         {
-            // Check for necessary bluetooth permissions and request if necessary
-            // You may need to restart the app on the headset after granting permissions.
-            // Sometimes, you may need to restart the app twice for the permissions to fully work.
-            // This is a quick and dirty solution for getting the permissions.
-            // A better way is to use callbacks to let everything else know when the permissions have been granted.
-            bool hasBtConnectPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_CONNECT");
-            bool hasBtPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH");
-            bool hasBtAdminPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_ADMIN");
-            bool hasBtScanPermission = Permission.HasUserAuthorizedPermission("android.permission.BLUETOOTH_SCAN");
+            // Remove permissions that have already been granted
+            BtPermissionsNeeded.RemoveWhere(item => Permission.HasUserAuthorizedPermission(item));
 
-            List<string> permissionsNeeded = new List<string>();
-            if (!hasBtConnectPermission)
-            {
-                permissionsNeeded.Add("android.permission.BLUETOOTH_CONNECT");
-            }
-            if (!hasBtPermission)
-            {
-                permissionsNeeded.Add("android.permission.BLUETOOTH");
-            }
-            if (!hasBtAdminPermission)
-            {
-                permissionsNeeded.Add("android.permission.BLUETOOTH_ADMIN");
-            }
-            if (!hasBtScanPermission)
-            {
-                permissionsNeeded.Add("android.permission.BLUETOOTH_SCAN");
-            }
-            Debug.LogWarning("May need to restart the app. Requesting permissions: " + string.Join(", ", permissionsNeeded));
+            // Convert what is left in the hashset to a list as preparation to ask for permissions
+            List<string> permissionsNeeded = new List<string>(BtPermissionsNeeded);
 
+            // If there are no permissions left to ask for, then we can proceed with bluetooth setup
+            // else, ask for the permissions
             if (permissionsNeeded.Count == 0)
             {
                 BluetoothPermissionsGranted();
             }
             else
             {
+                // If you have set up callbacks correctly, you should not need to restart the app.
+                // Otherwise, you may need to restart the app (up to 2 times) to get bluetooth working.
+
+                Debug.LogWarning("May need to restart the app. Requesting permissions: " + string.Join(", ", permissionsNeeded));
+
                 var callbacks = new PermissionCallbacks();
                 callbacks.PermissionDenied += PermissionCallbacks_PermissionDenied;
                 callbacks.PermissionGranted += PermissionCallbacks_PermissionGranted;
