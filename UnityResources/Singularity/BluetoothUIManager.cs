@@ -27,6 +27,11 @@ public class BluetoothUIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+    }
+
+    public void onBluetoothReady()
+    {
+        // only setup the UI after the bluetooth is ready
         updateDeviceOptions();
     }
 
