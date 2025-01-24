@@ -161,7 +161,7 @@ namespace Sngty
 
         }
 
-        public void sendMessage(string message, DeviceSignature sig)
+        public void sendMessage(string message)
         {
             if (connectionType == ConnectionType.Wifi)
             {
@@ -179,16 +179,17 @@ namespace Sngty
                 }
                 return;
             }
-            for (int i = 0; i < connectedDevices.Count; i++)
-            {
-                if (connectedDevices[i].Call<string>("mac") == sig.mac)
-                {
-                    AndroidJavaObject connectedDevice = connectedDevices[i];
-                    AndroidJavaObject deviceInterface = connectedDevice.Call<AndroidJavaObject>("toSimpleDeviceInterface");
-                    deviceInterface.Call("sendMessage", message);
-                    break;
-                }
-            }
+
+            //for (int i = 0; i < connectedDevices.Count; i++)
+            //{
+            //    if (connectedDevices[i].Call<string>("mac") == sig.mac)
+            //    {
+            //        AndroidJavaObject connectedDevice = connectedDevices[i];
+            //        AndroidJavaObject deviceInterface = connectedDevice.Call<AndroidJavaObject>("toSimpleDeviceInterface");
+            //        deviceInterface.Call("sendMessage", message);
+            //        break;
+            //    }
+            //}
         }
 
         public void DisconnectDevice(DeviceSignature sig)
