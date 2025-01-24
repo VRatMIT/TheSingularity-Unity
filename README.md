@@ -12,8 +12,8 @@ Check the [Wiki](https://github.com/VRatMIT/TheSingularity-Unity/wiki) for a qui
 
 **Supported communication methods:**
 * Bluetooth Serial
+* Wifi (TCP)
 * *[PLANNED]* USB Serial (PC Only)
-* *[PLANNED]* Wifi
 
 **Tested platforms:**
 * Oculus Quest 2
