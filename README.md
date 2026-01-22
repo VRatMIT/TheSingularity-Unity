@@ -1,4 +1,4 @@
-![](https://media.discordapp.net/attachments/899720377230577684/1060691817525432330/TheSingularity.png)  
+<img width="1356" height="306" alt="image" src="https://github.com/user-attachments/assets/23f1cde9-3882-43b5-8c55-10e7642c7511" />
 
 # The SDK where XR Hardware and Software come together.  
 
